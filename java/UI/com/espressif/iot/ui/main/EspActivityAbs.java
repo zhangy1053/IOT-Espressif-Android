@@ -35,7 +35,6 @@ public abstract class EspActivityAbs extends Activity
         super.onCreate(savedInstanceState);
         
         super.setContentView(R.layout.esp_activity_abs);
-        getActionBar().hide();
         
         mContentView = (FrameLayout)findViewById(R.id.content);
         

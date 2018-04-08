@@ -29,5 +29,9 @@
     <dimen name="esp_light_colors_views_margin">15dip</dimen>
     <dimen name="esp_light_arc_view_width">210dip</dimen>
     <dimen name="esp_light_arc_view_padding">5dip</dimen>
-
+    
+    <dimen name="esp_user_center_item_height">50dip</dimen>
+    <dimen name="esp_user_center_item_padding_left">20dip</dimen>
+	<dimen name="new_user_center_right_arrow_width">16dip</dimen>
+	<dimen name="new_user_center_right_arrow_high">24dip</dimen>
 </resources>

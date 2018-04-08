@@ -30,6 +30,8 @@ public class EspApplication extends Application
 {
     private static EspApplication instance;
     
+    public static final String version = "1.0.0";
+    
     public static EspApplication sharedInstance()
     {
         if (instance == null)
