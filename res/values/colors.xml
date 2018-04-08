@@ -32,4 +32,14 @@
 
     <color name="esp_device_online">@color/esp_actionbar_color</color>
     <color name="esp_device_offline">#ff999999</color>
+    
+	<color name="esp_color_blue">#ff3399ff</color>
+	<color name="white">#ffffffff</color>
+    <color name="gray">#ffebebeb</color>
+	<color name="page_title">#ff555555</color>	
+    <color name="div_line">#ffe9e9e9</color>
+    <color name="red">#ffee4b4b</color>    	
+    <color name="scene_log_offline_alert">#ffdc8157</color>   
+    <color name="transparent">#00cbc7c7</color>     
+    <color name="black">#ff000000</color>      
 </resources>

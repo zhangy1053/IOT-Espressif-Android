@@ -96,4 +96,20 @@
         <item name="android:drawablePadding">15dip</item>
         <item name="android:background">@drawable/esp_activity_icon_background</item>
     </style>
+
+    <style name="RadioGroupButtonStyle">
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+		<item name="android:drawablePadding">2dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/esp_color_blue</item>
+    </style>
+
+	<style name="user_fragment_all">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/page_title</item>
+    </style>
 </resources>
