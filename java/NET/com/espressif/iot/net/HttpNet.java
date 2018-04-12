@@ -19,15 +19,16 @@ public class HttpNet {
 
 	public static final String GET = "GET";
 	public static final String POST = "POST";
-	public static final String UTF_8 = "utf-8";
 
 	public static final String HOSTNAME = "";
 
-	public String doHttpPost(String url, String entry, HashMap<String, String> headerParams) {
+	public String doHttpPost(String url, String entry) {
 
 		HttpURLConnection connection = null;
 		try {
 			URL mUrl = new URL(url);
+			XLogger.d(url);
+			
 			connection = (HttpURLConnection) mUrl.openConnection();
 			connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -36,26 +37,8 @@ public class HttpNet {
 			connection.setRequestMethod(POST);
 			connection.setReadTimeout(30 * 1000);
 			connection.setConnectTimeout(10 * 1000);
-			connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+			connection.setRequestProperty("Content-Type", "text/plain");
 			connection.addRequestProperty("Connection", "close");
-            if(headerParams != null){
-                for(String key:headerParams.keySet()){
-                	connection.setRequestProperty(key, headerParams.get(key));
-                }
-            }
-
-			if (connection instanceof HttpsURLConnection) {
-				HttpsURLConnection connection2 = (HttpsURLConnection) connection;
-				connection2.setHostnameVerifier(new HostnameVerifier() {
-					
-					public boolean verify(String arg0, SSLSession arg1) {
-						if (HOSTNAME.equals(arg0)) {
-							return true;
-						}
-						return false;
-					}
-				});
-			}
 			connection.connect();
 			
 			if(!TextUtils.isEmpty(entry)){
@@ -66,12 +49,14 @@ public class HttpNet {
             }
 			
             String outputStr = null;
+            XLogger.e("getResponseCode:" + connection.getResponseCode());
 			if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
 				outputStr = streamToString(connection.getInputStream());
 			}
 			
 			return outputStr;
 		} catch (Exception e) {
+			e.printStackTrace();
             XLogger.e("doHttpsPost:" + e.getMessage());
 			return null;
 		} finally {

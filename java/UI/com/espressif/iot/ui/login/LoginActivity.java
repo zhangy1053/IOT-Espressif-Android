@@ -1,14 +1,23 @@
 package com.espressif.iot.ui.login;
 
+import org.json.JSONObject;
+
 import com.espressif.iot.R;
+import com.espressif.iot.account.AccountManager;
+import com.espressif.iot.log.XLogger;
 import com.espressif.iot.logintool.EspLoginSDK;
+import com.espressif.iot.net.HttpManager;
+import com.espressif.iot.net.HttpManagerInterface;
 import com.espressif.iot.type.user.EspLoginResult;
 import com.espressif.iot.ui.login.LoginThirdPartyDialog.OnLoginListener;
+import com.espressif.iot.ui.main.EspMainActivity;
 import com.espressif.iot.ui.register.RegisterActivity;
 import com.espressif.iot.user.IEspUser;
 import com.espressif.iot.user.builder.BEspUser;
 import com.espressif.iot.util.AccountUtil;
 import com.espressif.iot.util.EspStrings;
+import com.espressif.iot.util.SharedPrefUtils;
+import com.espressif.iot.util.ToastUtils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -117,40 +126,47 @@ public class LoginActivity extends Activity implements OnClickListener, OnEditor
     }
 
     private void login() {
-        final String account = mEmailEdt.getText().toString();
-        final int accountType = AccountUtil.getAccountType(account);
-        if (accountType == AccountUtil.TYPE_NONE) {
-            // Account id is illegal
-            Toast.makeText(this, R.string.esp_login_email_hint, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        final String password = mPasswordEdt.getText().toString();
-        if (TextUtils.isEmpty(password)) {
-            // The password can't be empty
-            Toast.makeText(this, R.string.esp_login_password_hint, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        new LoginTask(this) {
-            @Override
-            public EspLoginResult doLogin() {
-                if (accountType == AccountUtil.TYPE_EMAIL) {
-                    // Login with Email
-                    return mUser.doActionUserLoginInternet(account, password);
-                } else if (accountType == AccountUtil.TYPE_PHONE) {
-                    // Login with Phone number
-                    return mUser.doActionUserLoginPhone(account, password);
-                }
+    	
+        try {
+        	final String userName = mEmailEdt.getText().toString().trim();
+        	final String passwd = mPasswordEdt.getText().toString().trim();
+        	
+            JSONObject register = new JSONObject();
+            register.put("loginName", userName);
+            register.put("passwd", passwd);
+            
+            HttpManager.getInstances().requestLogin(this, register.toString(), new HttpManagerInterface() {
+    			
+    			@Override
+    			public void onRequestResult(int flag, String msg) {
+    				if(flag == HttpManagerInterface.REQUEST_OK){
+    					try {
+							JSONObject content = new JSONObject(msg);
+							JSONObject result = new JSONObject(content.optString("result"));
+							String code = result.optString("code");
+							String message = result.optString("msg");
+							String userInfo = result.optString("userInfo");
+							if("OK".equals(code)){
+								AccountManager.getInstance().saveUserInfo(LoginActivity.this, userInfo);
+								SharedPrefUtils.saveLoginTime(LoginActivity.this, System.currentTimeMillis());
+		    					startActivity(new Intent(LoginActivity.this, EspMainActivity.class));
+		    					LoginActivity.this.finish();
+							}else{
+								XLogger.d("showToast");
+								ToastUtils.showToast(LoginActivity.this, "登录失败:" + message);
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+							XLogger.d("Exception");
+						}
+    				}else{
+    					ToastUtils.showToast(LoginActivity.this, "登录失败");
+    				}
+    			}
+    		});
+		} catch (Exception e) {
 
-                return null;
-            }
-
-            @Override
-            public void loginResult(EspLoginResult result) {
-                if (result == EspLoginResult.SUC) {
-                    loginSuccess();
-                }
-            }
-        }.execute();
+		}
     }
 
     private OnLoginListener mThirdPartyLoginListener = new OnLoginListener() {

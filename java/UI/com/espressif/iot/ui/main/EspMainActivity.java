@@ -79,10 +79,6 @@ public class EspMainActivity extends Activity {
 
         prepare();
 
-        if (!mUser.isLogin()) {
-            Toast.makeText(this, R.string.esp_main_not_login_msg, Toast.LENGTH_LONG).show();
-        }
-
         mFragmentManager = getFragmentManager();
 //        DrawerLayout dl = (DrawerLayout)findViewById(R.id.drawer_layout);
 //

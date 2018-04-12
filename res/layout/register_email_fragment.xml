@@ -14,14 +14,31 @@
         style="@style/RegisterEditText"
         android:drawableLeft="@drawable/esp_register_icon_account"
         android:hint="@string/esp_register_account" />
-
+    
     <EditText
         android:id="@+id/register_email"
         style="@style/RegisterEditText"
         android:drawableLeft="@drawable/esp_register_icon_email"
         android:inputType="textEmailAddress"
         android:hint="@string/esp_register_email" />
+    
+	<Button
+        android:id="@+id/register_get_email_code"
+        style="@style/YellowButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dip"
+        android:singleLine="true"
+        android:text="@string/esp_register_get_email_captcha_code"
+        android:textSize="16sp" />
 
+	<EditText
+        android:id="@+id/register_email_code"
+        style="@style/RegisterEditText"
+        android:gravity="center"
+        android:hint="@string/esp_register_captcha_code" />
+    
     <EditText
         android:id="@+id/register_password"
         style="@style/RegisterEditText"

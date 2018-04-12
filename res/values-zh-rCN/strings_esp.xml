@@ -91,6 +91,7 @@
     <string name="esp_register_phone">手机号</string>
     <string name="esp_register_captcha_code">验证码</string>
     <string name="esp_register_get_sms_captcha_code">获取短信验证码</string>
+    <string name="esp_register_get_email_captcha_code">获取邮箱验证码</string>    
     <string name="esp_register_with_email"><u>使用邮箱注册</u></string>
     <string name="esp_register_with_phone"><u>使用手机号注册</u></string>
     <string name="esp_register_phone_number_toast">请输入手机号</string>
