@@ -3,13 +3,18 @@ package com.espressif.iot.ui.main;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
 import com.espressif.iot.R;
 import com.espressif.iot.base.application.EspApplication;
+import com.espressif.iot.ui.login.LoginActivity;
 import com.espressif.iot.ui.widget.adapter.EspPagerAdapter;
 import com.espressif.iot.ui.widget.view.EspViewPager;
+import com.espressif.iot.util.SharedPrefUtils;
+import com.espressif.iot.util.ToastUtils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -46,6 +51,12 @@ public class WelcomeActivity extends Activity
     
     private EspApplication mApplication;
     
+	private Timer timer = new Timer();
+	private int welcomeTime = 3; //欢迎页面展示时间
+	private Runnable runnable;
+	
+	private static final long twoDay = 2 * 24 * 60 * 60 * 1000;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -67,16 +78,37 @@ public class WelcomeActivity extends Activity
         mShared = getSharedPreferences(NAME_USE_INFO, Context.MODE_PRIVATE);
         int lastUseVersion = mShared.getInt(KEY_LAST_USE_VERSION_CODE, 0);
         int currentVersion = mApplication.getVersionCode();
-        if (currentVersion > lastUseVersion)
-        {
+        
+        if (currentVersion > lastUseVersion){
             mHandler.sendEmptyMessageDelayed(MSG_SHOW_PAGER, 1000);
-        }
-        else
-        {
-            mHandler.sendEmptyMessage(MSG_LOGIN);
+        }else{
+    		timer.schedule(task, 1000, 1000);// 等待时间一秒，停顿时间一秒
+
+    		mHandler.postDelayed(runnable = new Runnable() {
+    			@Override
+    			public void run() {
+    				login();
+    			}
+    		}, 3000);
         }
     }
 
+	private TimerTask task = new TimerTask() {
+		@Override
+		public void run() {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					welcomeTime--;
+					if (welcomeTime < 0) {
+						timer.cancel();
+						timer = null;
+					}
+				}
+			});
+		}
+	};
+	
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -164,13 +196,22 @@ public class WelcomeActivity extends Activity
         mPager.startAnimation(pagerInAnim);
     }
     
-    private void login()
-    {
-        // Go to LoginActivity
-        Intent loginIntent = new Intent(this, EspMainActivity.class);
-        startActivity(loginIntent);
-        
+    private void login(){
+    	if(System.currentTimeMillis() - SharedPrefUtils.getLoginTime(this) > twoDay){
+    		ToastUtils.showToast(this, "登录账号已经过期,请重新登录");
+        	startActivity(new Intent(this, LoginActivity.class));
+    	}else{
+        	startActivity(new Intent(this, EspMainActivity.class));
+    	}
         finish();
+        
+        try {
+            if (runnable != null) {
+    			mHandler.removeCallbacks(runnable);
+    		}
+		} catch (Exception e) {
+
+		}
     }
     
     private static class WelcomeHandler extends Handler

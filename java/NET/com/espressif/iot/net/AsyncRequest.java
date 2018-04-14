@@ -1,7 +1,6 @@
 package com.espressif.iot.net;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,14 +30,13 @@ public class AsyncRequest {
 		return instance;
 	}
 	
-	//带请求头的http/https请求，如果没有请求头，传null即可
-	public void requestMessage(final String url, final String message, final HashMap<String, String> header, final RequestListener listener) {	
+	public void requestMessage(final String url, final String message, final RequestListener listener) {	
 		mExecutorService.submit(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					String is = mHttpNet.doHttpPost(url, message, header);
+					String is = mHttpNet.doHttpPost(url, message);
 					listener.onComplete(is);
 				} catch (Exception e) {
 					XLogger.e(e.getMessage());

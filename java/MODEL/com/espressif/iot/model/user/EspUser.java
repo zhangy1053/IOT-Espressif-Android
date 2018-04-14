@@ -111,6 +111,7 @@ import com.espressif.iot.esptouch.EsptouchResult;
 import com.espressif.iot.esptouch.IEsptouchListener;
 import com.espressif.iot.esptouch.IEsptouchResult;
 import com.espressif.iot.group.IEspGroup;
+import com.espressif.iot.log.XLogger;
 import com.espressif.iot.model.device.cache.EspDeviceCache;
 import com.espressif.iot.model.device.cache.EspDeviceCacheHandler;
 import com.espressif.iot.model.device.statemachine.EspDeviceStateMachine;
@@ -1503,17 +1504,17 @@ public class EspUser implements IEspUser
         final boolean isSsidHidden, final boolean requiredActivate, int expectTaskResultCount,
         IEsptouchListener esptouchListener)
     {
-        log.debug("addDevicesSyn(apSsid=[" + apSsid + "],apBssid=[" + apBssid + "],apPassword=[" + apPassword
+    	XLogger.d("addDevicesSyn(apSsid=[" + apSsid + "],apBssid=[" + apBssid + "],apPassword=[" + apPassword
             + "],isSsidHidden=[" + isSsidHidden + "],requiredActivate=[" + requiredActivate + "])");
         
         if (!doEsptouchTaskPrepare())
         {
-            log.debug("addDevicesSyn fail for doEsptouchTaskPrepare()");
+        	XLogger.d("addDevicesSyn fail for doEsptouchTaskPrepare()");
             return false;
         }
         if (mActionDeviceEsptouch.isExecuted())
         {
-            log.debug("addDevicesSyn fail for mActionDeviceEsptouch.isExecuted()");
+        	XLogger.d("addDevicesSyn fail for mActionDeviceEsptouch.isExecuted()");
             return false;
         }
         
@@ -1548,7 +1549,7 @@ public class EspUser implements IEspUser
                 return false;
             }
         }
-        log.error("addDevicesSyn finish");
+        XLogger.e("addDevicesSyn finish");
         // check whether there's device activating suc
         if (isEsptouchSuc)
         {
@@ -1659,7 +1660,7 @@ public class EspUser implements IEspUser
         final String apPassword, final boolean isSsidHidden, boolean requiredActivate, int expectTaskResultCount,
         IEsptouchListener esptouchListener)
     {
-        log.debug("doEsptouchTaskSynAddDeviceAsyn entrance");
+    	XLogger.d("doEsptouchTaskSynAddDeviceAsyn entrance");
         List<IEsptouchResult> esptouchResultList =
             mActionDeviceEsptouch.doActionDeviceEsptouch(expectTaskResultCount,
                 apSsid,
@@ -1668,20 +1669,20 @@ public class EspUser implements IEspUser
                 isSsidHidden,
                 esptouchListener);
         // when requiredActivate false, we should discover sta devices
-        log.debug("doEsptouchTaskSynAddDeviceAsyn requiredActivate = true");
+        XLogger.d("doEsptouchTaskSynAddDeviceAsyn requiredActivate = true");
         if (requiredActivate)
         {
-            log.debug("doEsptouchTaskSynAddDeviceAsyn add sta device list last discovered");
+        	XLogger.d("doEsptouchTaskSynAddDeviceAsyn add sta device list last discovered");
             if (!mActionDeviceEsptouch.isCancelled() || mActionDeviceEsptouch.isDone())
             {
                 // clear the interrupted by esptouchResultList
-                log.debug("doEsptouchTaskSynAddDeviceAsyn clear the interrupted set by esptouch");
+            	XLogger.d("doEsptouchTaskSynAddDeviceAsyn clear the interrupted set by esptouch");
                 Thread.interrupted();
             }
             else
             {
                 // for esptouch configured is cancelled, make first result fail
-                log.debug("doEsptouchTaskSynAddDeviceAsyn mActionDeviceEsptouch is cancelled");
+            	XLogger.d("doEsptouchTaskSynAddDeviceAsyn mActionDeviceEsptouch is cancelled");
                 esptouchResultList.clear();
                 IEsptouchResult failResult = new EsptouchResult(false, null, null);
                 esptouchResultList.add(failResult);
@@ -1689,7 +1690,7 @@ public class EspUser implements IEspUser
             }
             
             // add the esptouch devices
-            log.debug("doEsptouchTaskSynAddDeviceAsyn add the remainder esptouchResultList");
+            XLogger.d("doEsptouchTaskSynAddDeviceAsyn add the remainder esptouchResultList");
             for (IEsptouchResult esptouchResult : esptouchResultList)
             {
                 // check whether the task is executed suc

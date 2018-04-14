@@ -1,12 +1,20 @@
 package com.espressif.iot.ui.register;
 
+import org.json.JSONObject;
+
 import com.espressif.iot.R;
 import com.espressif.iot.base.api.EspBaseApiUtil;
+import com.espressif.iot.log.XLogger;
+import com.espressif.iot.net.HttpManager;
+import com.espressif.iot.net.HttpManagerInterface;
 import com.espressif.iot.type.user.EspRegisterResult;
+import com.espressif.iot.ui.login.LoginActivity;
+import com.espressif.iot.ui.main.EspMainActivity;
 import com.espressif.iot.user.IEspUser;
 import com.espressif.iot.user.builder.BEspUser;
 import com.espressif.iot.util.AccountUtil;
 import com.espressif.iot.util.EspStrings;
+import com.espressif.iot.util.ToastUtils;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -38,9 +46,11 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
     private EditText mPasswordEdt;
     private EditText mPasswordAgainEdt;
     private TextView mWithPhoneTV;
+    private EditText mEmailCodeEdt;
     
     private Button mCancelBtn;
     private Button mRegisterBtn;
+    private Button mGetEmailCodeBtn;
     
     private Handler mHandler;
     
@@ -69,6 +79,7 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+    	XLogger.d("onCreateView");
         View view = inflater.inflate(R.layout.register_email_fragment, container, false);
         
         mUsernameEdt = (EditText)view.findViewById(R.id.register_username);
@@ -91,6 +102,10 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
         mRegisterBtn = (Button)view.findViewById(R.id.register_register);
         mRegisterBtn.setOnClickListener(this);
         
+        mGetEmailCodeBtn = (Button)view.findViewById(R.id.register_get_email_code);
+        mGetEmailCodeBtn.setOnClickListener(this);
+        
+        mEmailCodeEdt = (EditText)view.findViewById(R.id.register_email_code);
         return view;
     }
     
@@ -126,6 +141,45 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
         {
             mActivity.showFragment(RegisterPhoneFragment.TAG);
         }
+        else if(v == mGetEmailCodeBtn){
+        	getEmailCode();
+        }
+    }
+    
+    private void getEmailCode(){
+        try {
+        	final String email = mEmailEdt.getText().toString().trim();
+        	if(TextUtils.isEmpty(email)){
+        		ToastUtils.showToast(mActivity, "邮箱不能为空");
+        		return;
+        	}
+        	
+            HttpManager.getInstances().requestEmailCode(mActivity, email, new HttpManagerInterface() {
+    			
+    			@Override
+    			public void onRequestResult(int flag, String msg) {
+    				if(flag == HttpManagerInterface.REQUEST_OK){
+    					try {
+							JSONObject content = new JSONObject(msg);
+							JSONObject result = new JSONObject(content.optString("result"));
+							String code = result.optString("code");
+							String message = result.optString("msg");
+							if("OK".equals(code)){
+		    					ToastUtils.showToast(mActivity, "注册码获取成功");
+							}else{
+								ToastUtils.showToast(mActivity, "注册码获取失败:" + message);
+							}
+    					}catch(Exception e){
+    						
+    					}
+    				}else{
+    					ToastUtils.showToast(mActivity, "注册码获取失败");
+    				}
+    			}
+    		});
+		} catch (Exception e) {
+
+		}
     }
     
     private void registerEmail()
@@ -134,49 +188,56 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
         {
             return;
         }
-        if (mUsernameEdt.hasFocus())
-        {
-            mUsernameEdt.clearFocus();
-        }
         
         if (!mActivity.checkPassword(mPasswordEdt, mPasswordAgainEdt))
         {
             return;
         }
         
-        if (mEmailEdt.hasFocus())
-        {
-            mEmailEdt.clearFocus();
-        }
-        
         final String username = mUsernameEdt.getText().toString();
         final String email = mEmailEdt.getText().toString();
         final String password = mPasswordEdt.getText().toString();
-        new RegisterTaskAbs(getActivity())
-        {
+        final String emailCode = mEmailCodeEdt.getText().toString().trim();
+        
+    	if(TextUtils.isEmpty(emailCode)){
+    		ToastUtils.showToast(mActivity, "验证码不能为空");
+    		return;
+    	}
+    	
+        try {
+            JSONObject register = new JSONObject();
+            register.put("userName", username);
+            register.put("passwd", password);
+            register.put("userEmail", email);
+            register.put("RegisterCode", emailCode);
             
-            @Override
-            protected EspRegisterResult doRegister()
-            {
-                return mUser.doActionUserRegisterInternet(username, email, password);
-            }
-            
-            @Override
-            protected void registerResult(EspRegisterResult result)
-            {
-                switch (result)
-                {
-                    case SUC:
-                        registerSuccess(email, password);
-                        break;
-                    case NETWORK_UNACCESSIBLE:
-                    case CONTENT_FORMAT_ERROR:
-                    case USER_OR_EMAIL_EXIST_ALREADY:
-                        registerFailed(result);
-                        break;
-                }
-            }
-        }.execute();
+            HttpManager.getInstances().requestRegister(mActivity, register.toString(), new HttpManagerInterface() {
+    			
+    			@Override
+    			public void onRequestResult(int flag, String msg) {
+    				if(flag == HttpManagerInterface.REQUEST_OK){
+    					try {
+							JSONObject content = new JSONObject(msg);
+							JSONObject result = new JSONObject(content.optString("result"));
+							String code = result.optString("code");
+							String message = result.optString("msg");
+							if("OK".equals(code)){
+		    					ToastUtils.showToast(mActivity, "注册成功");
+		    					getActivity().finish();
+							}else{
+								ToastUtils.showToast(mActivity, "注册失败:" + message);
+							}
+    					}catch(Exception e){
+    						
+    					}
+    				}else{
+    					ToastUtils.showToast(mActivity, "注册失败:" + msg);
+    				}
+    			}
+    		});
+		} catch (Exception e) {
+
+		}
     }
 
     @Override
@@ -186,14 +247,14 @@ public class RegisterEmailFragment extends Fragment implements OnClickListener, 
         {
             if (!hasFocus)
             {
-                findAccount(mUsernameEdt, FIND_USERNAME_EXIST);
+                //findAccount(mUsernameEdt, FIND_USERNAME_EXIST);
             }
         }
         else if (v == mEmailEdt)
         {
             if (!hasFocus)
             {
-                findAccount(mEmailEdt, FIND_EMAIL_EXIST);
+                //findAccount(mEmailEdt, FIND_EMAIL_EXIST);
             }
         }
     }
