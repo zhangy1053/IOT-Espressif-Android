@@ -31,11 +31,14 @@ public class EspMainDeviceFragment extends Fragment implements OnClickListener{
 	private ImageView mImg_scanDevice;
 	
     public static final int REQUEST_SCAN = 1;
+    
+    public Bundle data;
 	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		mFmanager = getFragmentManager();
+		data = getArguments();
 	}
 	
 	@Override
@@ -52,6 +55,8 @@ public class EspMainDeviceFragment extends Fragment implements OnClickListener{
 
         mDeviceAllFragment = new DeviceAllFragment();
         mDeviceScenesFragment = new DeviceScenesFragment();
+        
+        mDeviceAllFragment.setArguments(data);
         mFmanager.beginTransaction().replace(R.id.mydevice_container, mDeviceAllFragment).commit();
 
 		return view;

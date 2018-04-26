@@ -200,6 +200,7 @@ public class WelcomeActivity extends Activity
     	if(System.currentTimeMillis() - SharedPrefUtils.getLoginTime(this) > twoDay){
     		ToastUtils.showToast(this, "登录账号已经过期,请重新登录");
         	startActivity(new Intent(this, LoginActivity.class));
+//        	startActivity(new Intent(this, EspMainActivity.class));
     	}else{
         	startActivity(new Intent(this, EspMainActivity.class));
     	}
