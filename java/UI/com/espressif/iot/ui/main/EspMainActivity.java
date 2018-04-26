@@ -19,6 +19,7 @@ import com.espressif.iot.base.net.proxy.EspProxyServerImpl;
 import com.espressif.iot.base.net.udp.UdpServer;
 import com.espressif.iot.db.EspGroupDBManager;
 import com.espressif.iot.esppush.EspPushUtils;
+import com.espressif.iot.log.XLogger;
 import com.espressif.iot.model.device.cache.EspDeviceCache;
 import com.espressif.iot.model.device.statemachine.EspDeviceStateMachineHandler;
 import com.espressif.iot.model.group.EspGroupHandler;
@@ -56,6 +57,7 @@ public class EspMainActivity extends Activity {
     public static final int REQUEST_LOGIN = 0x10;
     public static final int REQUEST_ESPTOUCH = 0x11;
     public static final int REQUEST_ENTRY_USERCENTER = 0x12;
+    public static final int REQUEST_ADD_DEVICE = 0x13;
 
     private SharedPreferences mSettingsShared;
 
@@ -119,7 +121,7 @@ public class EspMainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				startActivityForResult(new Intent(EspMainActivity.this, DeviceEspTouchActivity.class), REQUEST_ESPTOUCH);
+				startActivityForResult(new Intent(EspMainActivity.this, DeviceEspTouchActivity.class), REQUEST_ADD_DEVICE);
 			}
 		});
         
@@ -222,6 +224,12 @@ public class EspMainActivity extends Activity {
             mMainFragment.onActivityResult(requestCode, resultCode, data);
         } else if (requestCode == REQUEST_ENTRY_USERCENTER){
         	mRadioButtonDevice.setChecked(true);
+        } else if (requestCode == REQUEST_ADD_DEVICE){
+        	//if (resultCode == RESULT_OK) {
+	        	//mMainFragment.setArguments(data.getExtras());
+	        	mFragmentManager.beginTransaction().replace(R.id.container, mMainFragment).commit();
+	        	XLogger.d("on add device complete!");
+        	//}
         }
     }
 

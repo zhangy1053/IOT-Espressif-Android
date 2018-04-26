@@ -2,6 +2,7 @@ package com.espressif.iot.account;
 
 import org.json.JSONObject;
 
+import com.espressif.iot.log.XLogger;
 import com.espressif.iot.util.SharedPrefUtils;
 import android.content.Context;
 import android.text.TextUtils;
@@ -13,7 +14,7 @@ public class AccountManager {
 	private UserInfo mUserInfo;
 	
 	private AccountManager(){
-		mUserInfo = new UserInfo();
+
 	}
 	
 	public static AccountManager getInstance(){
@@ -37,7 +38,9 @@ public class AccountManager {
 	
 	public UserInfo getUserInfo(Context context){
 		if(mUserInfo == null){
-			mUserInfo = strtoUserInfo(SharedPrefUtils.getUserInfo(context));
+			String userInfo = SharedPrefUtils.getUserInfo(context);
+			XLogger.d("getSPuserInfo:" + userInfo);
+			mUserInfo = strtoUserInfo(userInfo);
 		}
 		return mUserInfo;
 	}

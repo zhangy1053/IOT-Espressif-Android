@@ -1,18 +1,28 @@
 package com.espressif.iot.ui.configure;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -31,19 +41,27 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.espressif.iot.R;
+import com.espressif.iot.account.AccountManager;
 import com.espressif.iot.base.api.EspBaseApiUtil;
 import com.espressif.iot.base.application.EspApplication;
 import com.espressif.iot.db.IOTApDBManager;
+import com.espressif.iot.esptouch.EspWifiAdminSimple;
+import com.espressif.iot.esptouch.EsptouchTask;
 import com.espressif.iot.esptouch.IEsptouchListener;
 import com.espressif.iot.esptouch.IEsptouchResult;
+import com.espressif.iot.esptouch.IEsptouchTask;
+import com.espressif.iot.esptouch.util.EspAES;
+import com.espressif.iot.log.XLogger;
+import com.espressif.iot.net.HttpManager;
+import com.espressif.iot.net.HttpManagerInterface;
 import com.espressif.iot.object.db.IApDB;
 import com.espressif.iot.ui.main.EspActivityAbs;
 import com.espressif.iot.user.IEspUser;
 import com.espressif.iot.user.builder.BEspUser;
 import com.espressif.iot.util.BSSIDUtil;
 import com.espressif.iot.util.EspStrings;
+import com.espressif.iot.util.ToastUtils;
 import com.google.zxing.qrcode.ui.ShareCaptureActivity;
 
 public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedChangeListener, OnClickListener,
@@ -82,6 +100,10 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
     private static final int REQUEST_SOFTAP_CONFIGURE = 10;
     private static final int REQUEST_GET_SHARED = 12;
     
+    private EspWifiAdminSimple mWifiAdmin;
+    
+    private IEsptouchResult mIEsptouchResult;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -89,6 +111,7 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
         
         setContentView(R.layout.esp_esptouch);
         
+        mWifiAdmin = new EspWifiAdminSimple(this);
         mIOTApDBManager = IOTApDBManager.getInstance();
         mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         mUser = BEspUser.getBuilder().getInstance();
@@ -379,108 +402,19 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
         mRegisteredDeviceNameList.clear();
         mEsptouchDeivceRegisterCount.set(0);
         mEsptouchDeviceBssidList.clear();
-        final String bssid = getConnectionBssid();
-        final String ssid = EspBaseApiUtil.getWifiConnectedSsid();
-        final String password = mPasswordEdT.getText().toString();
-        mIOTApDBManager.insertOrReplace(bssid, ssid, password);
-        final AlertDialog dialog = new AlertDialog.Builder(this).create();
         
-        final AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>()
-        {
-            @Override
-            protected void onPreExecute()
-            {
-                boolean isMultipleDevices = mMultipleDevicesCB.isChecked();
-                if(!isMultipleDevices)
-                {
-                    mEsptouchContentDoneBtn.setVisibility(View.GONE);
-                }
-            }
-            
-            @Override
-            protected Boolean doInBackground(Void... params)
-            {
-                boolean isMultipleDevices = mMultipleDevicesCB.isChecked();
-                boolean isSsidHidden = mIsHideSsidCB.isChecked();
-                boolean requiredActivate = mActivateCB.isChecked();
-                if (isMultipleDevices)
-                    return mUser.addDevicesSyn(ssid, bssid, password, isSsidHidden, requiredActivate, mEsptouchListener);
-                else
-                    return mUser.addDeviceSyn(ssid, bssid, password, isSsidHidden, requiredActivate, mEsptouchListener);
-            }
-            
-            @Override
-            protected void onPostExecute(Boolean result)
-            {
-                dialog.dismiss();
-                // show dialog, add device list
-                List<String> deviceNameList = filterConfigureDeviceNameList();
-                List<String> configuredDeviceBssidList = mEsptouchDeviceBssidList;
-                if (deviceNameList.isEmpty() && configuredDeviceBssidList.isEmpty()) {
-                    toastEspTouchResult(false);
-                }
-                String title = getString(R.string.esp_esptouch_result_title);
-                StringBuilder message = new StringBuilder();
-                message.append(getString(R.string.esp_esptouch_message_cloud_title, deviceNameList.size()));
-                for (String deviceName : deviceNameList)
-                {
-                    message.append(deviceName);
-                    message.append("\n");
-                }
-                
-                message.append("\n");
-                message.append(getString(R.string.esp_esptouch_message_wifi_title, configuredDeviceBssidList.size()));
-                for (String deviceBssid : configuredDeviceBssidList)
-                {
-                    message.append(BSSIDUtil.genDeviceNameByBSSID(deviceBssid));
-                    message.append("\n");
-                }
-                
-                new AlertDialog.Builder(DeviceEspTouchActivity.this).setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            esptouchOver();
-                        }
-                    })
-                    .show();
-            }
-        };
-        
-        dialog.setCancelable(false);
-        dialog.setView(mEsptouchContentView);
-        mEsptouchContentDoneBtn.setOnClickListener(new OnClickListener()
-        {
-            
-            @Override
-            public void onClick(View v)
-            {
-                mUser.doneAllAddDevices();
-            }
-        });
-        final Resources resources = getResources();
-        final String text = resources.getString(R.string.esp_esptouch_discovering_devices);
-        mEsptouchContentCountTV.setText(text);
-        dialog.setTitle(getString(R.string.esp_configure_configuring));
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE,
-            getString(android.R.string.cancel),
-            new DialogInterface.OnClickListener()
-            {
-                
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    mUser.cancelAllAddDevices();
-                    task.cancel(true);
-                    esptouchOver();
-                }
-            });
-        dialog.show();
-        
-        task.execute();
+        String apSsid = EspBaseApiUtil.getWifiConnectedSsid();
+        String apPassword = mPasswordEdT.getText().toString();
+        String apBssid = mWifiAdmin.getWifiConnectedBssid();
+        String taskResultCountStr = "1";
+
+        XLogger.d("mBtnConfirm is clicked, mEdtApSsid = " + apSsid
+                    + ", " + " mEdtApPassword = " + apPassword);
+        if(mTask != null) {
+            mTask.cancelEsptouch();
+        }
+        mTask = new EsptouchAsyncTask();
+        mTask.execute(apSsid, apBssid, apPassword, taskResultCountStr);
     }
     
     
@@ -491,9 +425,254 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
         finish();
     }
     
+    private EsptouchAsyncTask mTask;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
+            if(action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)){
+                NetworkInfo ni = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if (ni != null && !ni.isConnected()) {
+                    if (mTask != null) {
+                        mTask.cancelEsptouch();
+                        mTask = null;
+                        new AlertDialog.Builder(DeviceEspTouchActivity.this)
+                                .setMessage("Wifi disconnected or changed")
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show();
+                    }
+                }
+            }
+        }
+    };
+    
+    private void onEsptoucResultAddedPerform(final IEsptouchResult result) {
+    	XLogger.d("onEsptoucResultAddedPerform");
+    	
+    	try {
+        	mIEsptouchResult = result;
+        	
+        	JSONObject addDevice = new JSONObject();
+        	addDevice.put("deviceId", mIEsptouchResult.getBssid());
+        	addDevice.put("deviceType", mIEsptouchResult.getInetAddress().getHostAddress());
+        	addDevice.put("firendlyName", "unknow");
+        	addDevice.put("manufacturerName", "unknow");
+        	addDevice.put("userId", AccountManager.getInstance().getUserInfo(this).getUserId());
+        	
+        	HttpManager.getInstances().requestDeviceRegister(this, addDevice.toString(), new HttpManagerInterface() {
+    			
+    			@Override
+    			public void onRequestResult(int flag, String msg) {
+    				if(flag == HttpManagerInterface.REQUEST_OK){
+    					try {
+        					JSONObject content = new JSONObject(msg);
+        					JSONObject result = new JSONObject(content.optString("result"));
+        					if("OK".equals(result.optString("code"))){
+        						ToastUtils.showToast(DeviceEspTouchActivity.this, "设备注册成功");
+        					}
+        					getDeviceInfo();
+						} catch (Exception e) {
+							ToastUtils.showToast(DeviceEspTouchActivity.this, "设备注册失败");
+						}
+    				}else{
+    					ToastUtils.showToast(DeviceEspTouchActivity.this, "设备注册失败");
+    				}
+    			}
+    		});
+		} catch (Exception e) {
+
+		}
+
+//        runOnUiThread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//            	mIEsptouchResult = result;
+//                String text = result.getBssid() + " is connected to the wifi";
+//                Toast.makeText(DeviceEspTouchActivity.this, text,
+//                        Toast.LENGTH_LONG).show();
+//            }
+//
+//        });
+    }
+    
+    private Socket socket; 
+    
+    private void getDeviceInfo(){
+    	
+    	XLogger.d("getDeviceInfo");
+    	
+    	new Thread(new Runnable() {  
+            
+            @Override  
+            public void run() {  
+                try {  
+                		XLogger.d("IP:" + mIEsptouchResult.getInetAddress().getHostAddress());
+
+                        socket = new Socket(mIEsptouchResult.getInetAddress().getHostAddress(), 55555);
+                        InputStream is = socket.getInputStream();  
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+                        int i=-1;  
+                        while(  (i=is.read()) !=-1  ){  
+                            baos.write(i);  
+                        }  
+                        String result = baos.toString();  
+                        
+                        XLogger.d("getUserInfo result=" + result);
+                        is.close();  
+                        socket.close();  
+                    
+                      
+                } catch (Exception e) {  
+                    e.printStackTrace();  
+                }
+            }  
+        }).start(); 
+    }
+    
     private void toastEspTouchResult(boolean suc)
     {
         int msgRes = suc ? R.string.esp_configure_result_success : R.string.esp_configure_result_failed;
         Toast.makeText(this, msgRes, Toast.LENGTH_LONG).show();
+    }
+    
+    private IEsptouchListener myListener = new IEsptouchListener() {
+
+        @Override
+        public void onEsptouchResultAdded(final IEsptouchResult result) {
+            onEsptoucResultAddedPerform(result);
+        }
+    };
+    
+    private class EsptouchAsyncTask extends AsyncTask<String, Void, List<IEsptouchResult>> {
+
+        // without the lock, if the user tap confirm and cancel quickly enough,
+        // the bug will arise. the reason is follows:
+        // 0. task is starting created, but not finished
+        // 1. the task is cancel for the task hasn't been created, it do nothing
+        // 2. task is created
+        // 3. Oops, the task should be cancelled, but it is running
+        private final Object mLock = new Object();
+        private ProgressDialog mProgressDialog;
+        private IEsptouchTask mEsptouchTask;
+
+        public void cancelEsptouch() {
+            cancel(true);
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+            }
+            if (mEsptouchTask != null) {
+                mEsptouchTask.interrupt();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = new ProgressDialog(DeviceEspTouchActivity.this);
+            mProgressDialog
+                    .setMessage("Esptouch is configuring, please wait for a moment...");
+            mProgressDialog.setCanceledOnTouchOutside(false);
+            mProgressDialog.setOnCancelListener(new OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    synchronized (mLock) {
+                        XLogger.d("progress dialog is canceled");
+                        if (mEsptouchTask != null) {
+                            mEsptouchTask.interrupt();
+                        }
+                    }
+                }
+            });
+            mProgressDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                    "Waiting...", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        	XLogger.d("progress dialog is ok");
+                        	Intent intent = new Intent(Constant.DEVICE_ADD_COMPLETE);
+                            intent.putExtra("bssid", mIEsptouchResult.getBssid());
+                            intent.putExtra("ip", mIEsptouchResult.getInetAddress().getHostAddress());
+                            LocalBroadcastManager.getInstance(DeviceEspTouchActivity.this).sendBroadcast(intent);
+
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }
+                    });
+            mProgressDialog.show();
+            mProgressDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setEnabled(false);
+        }
+
+        @Override
+        protected List<IEsptouchResult> doInBackground(String... params) {
+            int taskResultCount = -1;
+            synchronized (mLock) {
+                // !!!NOTICE
+                String apSsid = mWifiAdmin.getWifiConnectedSsidAscii(params[0]);
+                String apBssid = params[1];
+                String apPassword = params[2];
+                String taskResultCountStr = params[3];
+                taskResultCount = Integer.parseInt(taskResultCountStr);
+                boolean useAes = false;
+                if (useAes) {
+                    byte[] secretKey = "1234567890123456".getBytes(); // TODO modify your own key
+                    EspAES aes = new EspAES(secretKey);
+                    mEsptouchTask = new EsptouchTask(apSsid, apBssid, apPassword, aes, DeviceEspTouchActivity.this);
+                } else {
+                    mEsptouchTask = new EsptouchTask(apSsid, apBssid, apPassword, null, DeviceEspTouchActivity.this);
+                }
+                mEsptouchTask.setEsptouchListener(myListener);
+            }
+            List<IEsptouchResult> resultList = mEsptouchTask.executeForResults(taskResultCount);
+            return resultList;
+        }
+
+        @Override
+        protected void onPostExecute(List<IEsptouchResult> result) {
+            mProgressDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                    .setEnabled(true);
+            mProgressDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(
+                    "OK");
+            if (result == null) {
+                mProgressDialog.setMessage("Create Esptouch task failed, the esptouch port could be used by other thread");
+                return;
+            }
+
+            IEsptouchResult firstResult = result.get(0);
+            // check whether the task is cancelled and no results received
+            if (!firstResult.isCancelled()) {
+                int count = 0;
+                // max results to be displayed, if it is more than maxDisplayCount,
+                // just show the count of redundant ones
+                final int maxDisplayCount = 5;
+                // the task received some results including cancelled while
+                // executing before receiving enough results
+                if (firstResult.isSuc()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (IEsptouchResult resultInList : result) {
+                        sb.append("Esptouch success, bssid = "
+                                + resultInList.getBssid()
+                                + ",InetAddress = "
+                                + resultInList.getInetAddress()
+                                .getHostAddress() + "\n");
+                        count++;
+                        if (count >= maxDisplayCount) {
+                            break;
+                        }
+                    }
+                    if (count < result.size()) {
+                        sb.append("\nthere's " + (result.size() - count)
+                                + " more result(s) without showing\n");
+                    }
+                    mProgressDialog.setMessage(sb.toString());
+                } else {
+                    mProgressDialog.setMessage("Esptouch fail");
+                }
+            }
+        }
     }
 }
