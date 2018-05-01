@@ -450,22 +450,20 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
             }
         }
     };
-    
-    private void onEsptoucResultAddedPerform(final IEsptouchResult result) {
-    	XLogger.d("onEsptoucResultAddedPerform");
-    	
-    	try {
-        	mIEsptouchResult = result;
-        	
+
+    private void deviceRegister(String info){
+        try {
+            JSONObject infoObj = new JSONObject(info);
+
         	JSONObject addDevice = new JSONObject();
         	addDevice.put("deviceId", mIEsptouchResult.getBssid());
-        	addDevice.put("deviceType", mIEsptouchResult.getInetAddress().getHostAddress());
-        	addDevice.put("firendlyName", "unknow");
-        	addDevice.put("manufacturerName", "unknow");
+        	addDevice.put("deviceType", infoObj.optString("deviceType"));
+        	addDevice.put("firendlyName", infoObj.optString("deviceType") + " " + mIEsptouchResult.getBssid().substring(mIEsptouchResult.getBssid().length() - 2));
+        	addDevice.put("manufacturerName", infoObj.optString("manufacturerName"));
         	addDevice.put("userId", AccountManager.getInstance().getUserInfo(this).getUserId());
-        	
+
         	HttpManager.getInstances().requestDeviceRegister(this, addDevice.toString(), new HttpManagerInterface() {
-    			
+
     			@Override
     			public void onRequestResult(int flag, String msg) {
     				if(flag == HttpManagerInterface.REQUEST_OK){
@@ -475,7 +473,7 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
         					if("OK".equals(result.optString("code"))){
         						ToastUtils.showToast(DeviceEspTouchActivity.this, "设备注册成功");
         					}
-        					getDeviceInfo();
+
 						} catch (Exception e) {
 							ToastUtils.showToast(DeviceEspTouchActivity.this, "设备注册失败");
 						}
@@ -484,6 +482,20 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
     				}
     			}
     		});
+        } catch (Exception e) {
+
+        }
+    }
+
+    
+    private void onEsptoucResultAddedPerform(final IEsptouchResult result) {
+    	XLogger.d("onEsptoucResultAddedPerform");
+    	
+    	try {
+        	mIEsptouchResult = result;
+
+            getDeviceInfo();
+
 		} catch (Exception e) {
 
 		}
@@ -511,22 +523,23 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
             
             @Override  
             public void run() {  
-                try {  
-                		XLogger.d("IP:" + mIEsptouchResult.getInetAddress().getHostAddress());
+                try {
+                    XLogger.d("IP:" + mIEsptouchResult.getInetAddress().getHostAddress());
 
-                        socket = new Socket(mIEsptouchResult.getInetAddress().getHostAddress(), 55555);
-                        InputStream is = socket.getInputStream();  
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-                        int i=-1;  
-                        while(  (i=is.read()) !=-1  ){  
-                            baos.write(i);  
-                        }  
-                        String result = baos.toString();  
-                        
-                        XLogger.d("getUserInfo result=" + result);
-                        is.close();  
-                        socket.close();  
-                    
+                    socket = new Socket(mIEsptouchResult.getInetAddress().getHostAddress(), 55555);
+                    InputStream is = socket.getInputStream();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    int i=-1;
+                    while(  (i=is.read()) !=-1  ){
+                        baos.write(i);
+                    }
+                    String result = baos.toString();
+
+                    XLogger.d("getUserInfo result=" + result);
+                    is.close();
+                    socket.close();
+
+                    deviceRegister(result);
                       
                 } catch (Exception e) {  
                     e.printStackTrace();  

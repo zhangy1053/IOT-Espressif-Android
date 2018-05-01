@@ -215,15 +215,11 @@ public class HttpManager {
 	/*
 	 * 设备开关
 	 */
-	public void requestDeviceSwitch(final Context context, String message, final HttpManagerInterface listener){
+	public void requestDeviceSwitch(final Context context, JSONObject device, final HttpManagerInterface listener){
 		
 		try {
-			JSONObject msg = new JSONObject(message);
-            JSONObject device = new JSONObject();
-            device.put("name_space", "Alexa.PowerController");
-            device.put("name", msg.optString("name"));
-            device.put("deviceId", msg.optString("deviceId"));
-            device.put("token", msg.optString("token"));
+		    device.put("name_space", "Alexa.PowerController");
+            device.put("token", "token");
             
             XLogger.d("deviceSwitch:" + device.toString());
             
@@ -237,6 +233,25 @@ public class HttpManager {
 						return;
 					}
 					listener.onRequestResult(HttpManagerInterface.REQUEST_OK, response);
+				}
+			});
+		} catch (Exception e) {
+			listener.onRequestResult(HttpManagerInterface.REQUEST_ERROR, "");
+		}
+	}
+
+	public void requestDeviceCtrl(final Context context, String info, final HttpManagerInterface listener){
+		try {
+            mAsyncRequest.requestMessage(Constant.SWITCHER, info, new RequestListener() {
+
+        @Override
+        public void onComplete(String response) {
+            XLogger.d(response);
+            if(TextUtils.isEmpty(response)){
+                listener.onRequestResult(HttpManagerInterface.REQUEST_ERROR, "");
+                return;
+            }
+            listener.onRequestResult(HttpManagerInterface.REQUEST_OK, response);
 				}
 			});
 		} catch (Exception e) {
@@ -259,7 +274,7 @@ public class HttpManager {
             
             XLogger.d("deviceStatus:" + status.toString());
             
-			mAsyncRequest.requestMessage(Constant.REGISTER, status.toString(), new RequestListener() {
+			mAsyncRequest.requestMessage(Constant.SWITCHER, status.toString(), new RequestListener() {
 				
 				@Override
 				public void onComplete(String response) {

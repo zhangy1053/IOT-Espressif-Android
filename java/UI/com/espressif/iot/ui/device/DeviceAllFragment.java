@@ -81,19 +81,51 @@ public class DeviceAllFragment extends Fragment{
 		}
 	};
 	
-	private void openDevice(int position){
+	private void openDevice(final int position){
 		try {
 			JSONObject info = new JSONObject();
+			info.put("name_space", "Alexa.PowerController");
 			info.put("deviceId", mDeviceList.get(position).getDevice_id());
-			info.put("name", "TurnOn");
 			info.put("token", "token");
-            
-			HttpManager.getInstances().requestDeviceSwitch(getActivity(), info.toString(), new HttpManagerInterface() {
+			if (mDeviceList.get(position).getDevice_status().equals("OFF")) {
+			    info.put("name", "TurnOn");
+			}
+			else {
+			    info.put("name", "TurnOff");
+            }
+
+			HttpManager.getInstances().requestDeviceCtrl(getActivity(), info.toString(),  new HttpManagerInterface() {
 				
 				@Override
-				public void onRequestResult(int flag, String msg) {
+				public void onRequestResult(int flag, final String msg) {
 					if(flag == HttpManagerInterface.REQUEST_OK){
-						
+					    uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    JSONObject content = new JSONObject(msg);
+                                    JSONArray prop = content.optJSONArray("properties");
+                                    for(int i=0; i<prop.length(); i++){
+                                        JSONObject status = prop.optJSONObject(i);
+                                        String namespace = status.optString("name_space");
+                                        if("Alexa.PowerController".equals(namespace)){
+                                            String value = status.optString("value");
+                                            XLogger.d("Alexa.PowerController:" + value);
+                                            mDeviceList.get(position).setDevice_status(value);
+                                        }else if("Alexa.EndpointHealth".equals(namespace)){
+                                            JSONObject connectivity_value = status.optJSONObject("value");
+                                            String value = connectivity_value.optString("value");
+                                            XLogger.d("connectivity:" + value);
+                                            mDeviceList.get(position).setDevice_connectivity_status(value);
+                                        }
+                                    }
+
+                                    mAdapter.notifyDataSetChanged();
+                                } catch (Exception e) {
+
+                                }
+                            }
+                        });
 					}
 				}
 			});
@@ -112,36 +144,92 @@ public class DeviceAllFragment extends Fragment{
             HttpManager.getInstances().requestDeviceList(getActivity(), device.toString(), new HttpManagerInterface() {
     			
     			@Override
-    			public void onRequestResult(int flag, String msg) {
+    			public void onRequestResult(int flag, final String msg) {
     				if(flag == HttpManagerInterface.REQUEST_OK){
-    					try {
-							JSONObject content = new JSONObject(msg);
-							if(content.has("devices")){
-								JSONArray deviceList = new JSONArray(content.optString("devices"));
-								if(deviceList != null && deviceList.length() > 0){
-									for(int i=0; i<deviceList.length(); i++){
-										JSONObject device = deviceList.getJSONObject(i);
-								        DeviceInfoBean deviceInfoBean = new DeviceInfoBean();
-								        deviceInfoBean.setDevice_id(device.optString("deviceId"));
-								        deviceInfoBean.setDevice_ip(device.optString("deviceType"));
-								        deviceInfoBean.setDevice_name(device.optString("friendlyName"));
-								        deviceInfoBean.setDevice_status(device.optString("manufacturerName"));
-								        mDeviceList.add(deviceInfoBean);
+							try {
+								mDeviceList.clear();
+								JSONObject content = new JSONObject(msg);
+								if(content.has("devices")) {
+									JSONArray deviceList = new JSONArray(content.optString("devices"));
+									if (deviceList != null && deviceList.length() > 0) {
+										for (int i = 0; i < deviceList.length(); i++) {
+											JSONObject device = deviceList.getJSONObject(i);
+											DeviceInfoBean deviceInfoBean = new DeviceInfoBean();
+											deviceInfoBean.setDevice_id(device.optString("deviceId"));
+											deviceInfoBean.setDevice_ip(device.optString("deviceType"));
+											deviceInfoBean.setDevice_name(device.optString("firendlyName"));
+											XLogger.d("name:" + device.optString("firendlyName"));
+											deviceInfoBean.setDevice_status(device.optString("manufacturerName"));
+											mDeviceList.add(deviceInfoBean);
+										}
 									}
+									quaryDeviceStatus(getActivity(), mDeviceList);
 								}
-						        mAdapter.notifyDataSetChanged();
+							}catch(Exception e){
+
 							}
-    					}catch(Exception e){
-    						
-    					}
-    				}
+						}
     			}
     		});
 		} catch (Exception e) {
 
 		}
 	}
-	
+
+	private void quaryDeviceStatus(Context context, List<DeviceInfoBean> deviceList){
+		try{
+			for(final DeviceInfoBean deviceInfoBean:deviceList){
+				JSONObject device = new JSONObject();
+				device.put("token", "token");
+				device.put("deviceId", deviceInfoBean.getDevice_id());
+
+				HttpManager.getInstances().requestDeviceStatus(context, device.toString(), new HttpManagerInterface() {
+					@Override
+					public void onRequestResult(int flag, final String msg) {
+						if(flag == HttpManagerInterface.REQUEST_OK){
+							uiHandler.post(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										JSONObject content = new JSONObject(msg);
+										JSONArray prop = content.optJSONArray("properties");
+										for(int i=0; i<prop.length(); i++){
+											JSONObject status = prop.optJSONObject(i);
+											String namespace = status.optString("name_space");
+											if("Alexa.PowerController".equals(namespace)){
+                                                String value = status.optString("value");
+                                                XLogger.d("Alexa.PowerController:" + value);
+												deviceInfoBean.setDevice_status(value);
+											}else if("Alexa.EndpointHealth".equals(namespace)){
+                                                JSONObject connectivity_value = status.optJSONObject("value");
+                                                String value = connectivity_value.optString("value");
+                                                XLogger.d("connectivity:" + value);
+                                                deviceInfoBean.setDevice_connectivity_status(value);
+											}
+										}
+										mAdapter.notifyDataSetChanged();
+									}catch (Exception e){
+
+									}
+								}
+							});
+						}else{
+
+						}
+					}
+				});
+			}
+		}catch (Exception e){
+
+		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		quaryDeviceStatus(getActivity(), mDeviceList);
+	}
+
 	@Override
 	public void onDetach() {
 		super.onDetach();
