@@ -156,10 +156,10 @@ public class DeviceAllFragment extends Fragment{
 											JSONObject device = deviceList.getJSONObject(i);
 											DeviceInfoBean deviceInfoBean = new DeviceInfoBean();
 											deviceInfoBean.setDevice_id(device.optString("deviceId"));
-											deviceInfoBean.setDevice_ip(device.optString("deviceType"));
+											deviceInfoBean.setDevice_ip("");
 											deviceInfoBean.setDevice_name(device.optString("firendlyName"));
-											XLogger.d("name:" + device.optString("firendlyName"));
 											deviceInfoBean.setDevice_status(device.optString("manufacturerName"));
+											deviceInfoBean.setDevice_connectivity_status("UNREARCHABLE");
 											mDeviceList.add(deviceInfoBean);
 										}
 									}
