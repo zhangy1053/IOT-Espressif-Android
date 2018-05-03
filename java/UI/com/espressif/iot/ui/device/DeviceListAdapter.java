@@ -87,9 +87,25 @@ public class DeviceListAdapter extends BaseAdapter{
 			mHolder = (ViewHolder) convertView.getTag();
 		}
 		
-		mHolder.device_name.setText(mDeviceInfoList.get(0).getDevice_name());
-		mHolder.device_status.setText(mDeviceInfoList.get(0).getDevice_status());
-		
+		mHolder.device_name.setText(mDeviceInfoList.get(position).getDevice_name());
+		mHolder.device_status.setText(mDeviceInfoList.get(position).getDevice_status());
+
+		if (mDeviceInfoList.get(position).getDevice_connectivity_status() != null &&
+		    mDeviceInfoList.get(position).getDevice_connectivity_status().equals("OK")) {
+			mHolder.wifi_img.setImageResource(R.drawable.device_online_wifi);
+		}
+		else {
+			mHolder.wifi_img.setImageResource(R.drawable.device_offline_wifi);
+		}
+
+		if (mDeviceInfoList.get(position).getDevice_status() != null &&
+				mDeviceInfoList.get(position).getDevice_status().equals("ON")) {
+			mHolder.switch_img.setImageResource(R.drawable.device_on);
+		}
+		else {
+			mHolder.switch_img.setImageResource(R.drawable.device_offline);
+		}
+
 		mHolder.switch_img.setOnClickListener(new OnClickListener() {
 			
 			@Override

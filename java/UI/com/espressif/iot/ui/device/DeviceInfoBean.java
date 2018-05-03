@@ -8,6 +8,7 @@ public class DeviceInfoBean implements Serializable{
 	
 	private String device_name;
 	private String device_status;
+	private String device_connectivity_status;
 	private String device_id;
 	private String device_ip;
 	
@@ -22,6 +23,12 @@ public class DeviceInfoBean implements Serializable{
 	}
 	public void setDevice_status(String device_status) {
 		this.device_status = device_status;
+	}
+	public String getDevice_connectivity_status() {
+		return device_connectivity_status;
+	}
+	public void setDevice_connectivity_status(String connectivity_status) {
+		this.device_connectivity_status = connectivity_status;
 	}
 	public String getDevice_id() {
 		return device_id;
