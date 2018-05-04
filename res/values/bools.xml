@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="abc_action_bar_embed_tabs">true</bool>
+    <bool name="abc_allow_stacked_button_bar">true</bool>
+    <bool name="abc_config_actionMenuItemAllCaps">true</bool>
+    <bool name="abc_config_closeDialogWhenTouchOutside">true</bool>
+    <bool name="abc_config_showMenuShortcutsWhenKeyboardPresent">false</bool>
+    <bool name="is_dingzhi">false</bool>
+    <bool name="keep_advs_startup">true</bool>
+    <bool name="keep_app_upgrade">true</bool>
+    <bool name="keep_bugly_statistical">true</bool>
+    <bool name="keep_feedback">true</bool>
+    <bool name="keep_guide">true</bool>
+    <bool name="keep_mask">true</bool>
+    <bool name="keep_scan_instruction">true</bool>
+    <bool name="keep_scene">true</bool>
+    <bool name="keep_select_language">true</bool>
+    <bool name="keep_umeng_analytics">true</bool>
+    <bool name="keep_umeng_push">true</bool>
+</resources>

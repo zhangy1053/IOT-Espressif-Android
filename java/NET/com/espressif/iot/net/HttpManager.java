@@ -244,14 +244,14 @@ public class HttpManager {
 		try {
             mAsyncRequest.requestMessage(Constant.SWITCHER, info, new RequestListener() {
 
-        @Override
-        public void onComplete(String response) {
-            XLogger.d(response);
-            if(TextUtils.isEmpty(response)){
-                listener.onRequestResult(HttpManagerInterface.REQUEST_ERROR, "");
-                return;
-            }
-            listener.onRequestResult(HttpManagerInterface.REQUEST_OK, response);
+	        @Override
+	        public void onComplete(String response) {
+		            XLogger.d(response);
+		            if(TextUtils.isEmpty(response)){
+		                listener.onRequestResult(HttpManagerInterface.REQUEST_ERROR, "");
+		                return;
+		            }
+		            listener.onRequestResult(HttpManagerInterface.REQUEST_OK, response);
 				}
 			});
 		} catch (Exception e) {

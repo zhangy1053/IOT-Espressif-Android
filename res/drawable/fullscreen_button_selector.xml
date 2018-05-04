@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:state_checked="false" android:drawable="@drawable/amplify_screen_dis" />
+    <item android:state_checked="true" android:state_pressed="true" android:drawable="@drawable/shrink_screen_pressed" />
+    <item android:state_checked="false" android:state_pressed="true" android:drawable="@drawable/amplify_screen_pressed" />
+    <item android:state_checked="true" android:drawable="@drawable/shrink_screen_normal" />
+    <item android:state_checked="false" android:drawable="@drawable/amplify_screen_normal" />
+</selector>

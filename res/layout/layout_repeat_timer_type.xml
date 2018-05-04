@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20.0dip"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center_horizontal"
+            android:text="@string/new_timer_data"
+            android:textColor="@color/gray_heavy"
+            android:textSize="16.0sp" />
+
+        <TextView
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center_horizontal"
+            android:text="@string/new_timer_time"
+            android:textColor="@color/timer_text_color"
+            android:textSize="16.0sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/picker_heigh"
+        android:layout_marginLeft="10.0dip"
+        android:layout_marginRight="10.0dip"
+        android:layout_marginTop="4.0dip"
+        android:background="@drawable/timer_type_shape"
+        android:orientation="horizontal" >
+
+        <DatePicker
+            android:id="@+id/data_picker"
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2.0dip"
+            android:layout_weight="1.0"
+            android:calendarViewShown="false" />
+
+        <TimePicker
+            android:id="@id/time_picker"
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="2.0dip"
+            android:layout_weight="1.0" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6.0dip"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/tv_this_year"
+                android:layout_width="0.0dip"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10.0dip"
+                android:layout_weight="1.0"
+                android:background="@drawable/year_gray_left"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/thisyear"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_after_year"
+                android:layout_width="0.0dip"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10.0dip"
+                android:layout_weight="1.0"
+                android:background="@drawable/year_gray_right"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/nextyear"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0" />
+    </LinearLayout>
+
+</LinearLayout>

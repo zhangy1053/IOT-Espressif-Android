@@ -39,6 +39,7 @@ public class DeviceListAdapter extends BaseAdapter{
 		void onSwitchClick(int position);
 		void onDeleteClick(int position);
 		void onClockClick(int position);
+		void onWifiClick(int position);
 	}
 	
 	@Override
@@ -111,6 +112,30 @@ public class DeviceListAdapter extends BaseAdapter{
 			@Override
 			public void onClick(View v) {
 				mListClickListener.onSwitchClick(position);
+			}
+		});
+		
+		mHolder.wifi_img.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mListClickListener.onWifiClick(position);
+			}
+		});
+		
+		mHolder.clock_img.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mListClickListener.onClockClick(position);
+			}
+		});
+		
+		mHolder.delete_img.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mListClickListener.onDeleteClick(position);
 			}
 		});
 		

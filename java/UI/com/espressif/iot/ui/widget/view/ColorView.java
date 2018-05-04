@@ -73,12 +73,12 @@ public class ColorView extends View {
                 case R.styleable.ColorView_shape:
                     mShape = a.getInteger(attr, SHAPE_CIRCLE);
                     break;
-                case R.styleable.ColorView_color:
-                    int mainColor = a.getColor(attr, defaultMainColor);
-                    int highlightColor = getHighlightColor(mainColor);
-                    mMainPaint.setColor(mainColor);
-                    mRingHighlightPaint.setColor(highlightColor);
-                    break;
+//                case R.styleable.ColorView_color:
+//                    int mainColor = a.getColor(attr, defaultMainColor);
+//                    int highlightColor = getHighlightColor(mainColor);
+//                    mMainPaint.setColor(mainColor);
+//                    mRingHighlightPaint.setColor(highlightColor);
+//                    break;
                 case R.styleable.ColorView_drawShadow:
                     mDrawShadowRing = a.getBoolean(attr, false);
                     break;

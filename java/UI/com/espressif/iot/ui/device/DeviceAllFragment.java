@@ -79,6 +79,11 @@ public class DeviceAllFragment extends Fragment{
 		public void onClockClick(int position) {
 		
 		}
+
+		@Override
+		public void onWifiClick(int position) {
+			
+		}
 	};
 	
 	private void openDevice(final int position){

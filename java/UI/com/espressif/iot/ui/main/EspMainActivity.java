@@ -24,6 +24,7 @@ import com.espressif.iot.model.device.cache.EspDeviceCache;
 import com.espressif.iot.model.device.statemachine.EspDeviceStateMachineHandler;
 import com.espressif.iot.model.group.EspGroupHandler;
 import com.espressif.iot.ui.configure.DeviceEspTouchActivity;
+import com.espressif.iot.ui.device.AddDeviceStep1;
 import com.espressif.iot.ui.device.DeviceAllFragment;
 import com.espressif.iot.ui.login.LoginActivity;
 import com.espressif.iot.ui.main.EspDrawerFragmentBase.NavigationDrawerCallbacks;
@@ -122,6 +123,7 @@ public class EspMainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				startActivityForResult(new Intent(EspMainActivity.this, DeviceEspTouchActivity.class), REQUEST_ADD_DEVICE);
+//				startActivityForResult(new Intent(EspMainActivity.this, AddDeviceStep1.class), REQUEST_ADD_DEVICE);
 			}
 		});
         
