@@ -114,10 +114,11 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="6.0dip"
-                            android:background="@drawable/animlist_dot_online_offline" />
+                            android:src="@drawable/animlist_dot_online_offline" />
                     </LinearLayout>
                 </RelativeLayout>
 
+                <!--
                 <RelativeLayout
                     android:id="@+id/gsm_device"
                     android:layout_width="fill_parent"
@@ -218,6 +219,7 @@
                         android:layout_marginRight="20.0dip"
                         android:text="@string/ez_camera" />
                 </RelativeLayout>
+                -->
 
                 <TextView
                     android:id="@+id/tv_confirm_pair_state_other_instruction"

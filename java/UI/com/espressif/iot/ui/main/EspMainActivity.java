@@ -122,8 +122,8 @@ public class EspMainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				startActivityForResult(new Intent(EspMainActivity.this, DeviceEspTouchActivity.class), REQUEST_ADD_DEVICE);
-//				startActivityForResult(new Intent(EspMainActivity.this, AddDeviceStep1.class), REQUEST_ADD_DEVICE);
+				//startActivityForResult(new Intent(EspMainActivity.this, DeviceEspTouchActivity.class), REQUEST_ADD_DEVICE);
+				startActivityForResult(new Intent(EspMainActivity.this, AddDeviceStep1.class), REQUEST_ADD_DEVICE);
 			}
 		});
         
