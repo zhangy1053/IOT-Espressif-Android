@@ -183,7 +183,7 @@
             android:name="com.espressif.iot.ui.device.AddDeviceStep4"
             android:screenOrientation="portrait" />  
         <activity
-            android:name="com.espressif.iot.ui.device.WifiSettingActivity"
+            android:name="com.espressif.iot.ui.device.DeviceSettingActivity"
             android:screenOrientation="portrait" />                           
     </application>
 

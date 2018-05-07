@@ -91,12 +91,12 @@
             android:paddingRight="30.0dip"
             android:weightSum="1.0" >
 
-            <elink.widget.MPatternProgressBar
+<!--             <elink.widget.MPatternProgressBar
                 android:id="@+id/mpb_wait_paring_progress"
                 android:layout_width="fill_parent"
                 android:layout_height="10.0dip"
                 android:layout_gravity="center"
-                android:layout_weight="1.0" />
+                android:layout_weight="1.0" /> -->
 
             <TextView
                 android:id="@+id/tv_wait_paring_timetext"

@@ -5,7 +5,7 @@ import com.espressif.iot.R;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class WifiSettingActivity extends Activity{
+public class DeviceSettingActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

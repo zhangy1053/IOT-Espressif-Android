@@ -29,8 +29,8 @@ public class AddDeviceStep1 extends Activity{
         TV_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(AddDeviceStep1.this, AddDeviceStep3.class), 0x13);
-                //startActivity(new Intent(AddDeviceStep1.this, AddDeviceStep3.class));
+                //startActivityForResult(new Intent(AddDeviceStep1.this, AddDeviceStep2.class), 0x13);
+                startActivity(new Intent(AddDeviceStep1.this, DeviceSettingActivity.class));
             }
         });
 
