@@ -458,7 +458,7 @@ public class DeviceEspTouchActivity extends EspActivityAbs implements OnCheckedC
         	JSONObject addDevice = new JSONObject();
         	addDevice.put("deviceId", mIEsptouchResult.getBssid());
         	addDevice.put("deviceType", infoObj.optString("deviceType"));
-        	addDevice.put("firendlyName", infoObj.optString("deviceType") + " " + mIEsptouchResult.getBssid().substring(mIEsptouchResult.getBssid().length() - 2));
+        	addDevice.put("friendlyName", infoObj.optString("deviceType") + "-" + mIEsptouchResult.getBssid().substring(mIEsptouchResult.getBssid().length() - 2));
         	addDevice.put("manufacturerName", infoObj.optString("manufacturerName"));
         	addDevice.put("userId", AccountManager.getInstance().getUserInfo(this).getUserId());
 

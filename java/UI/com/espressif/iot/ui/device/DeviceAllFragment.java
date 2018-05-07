@@ -162,7 +162,7 @@ public class DeviceAllFragment extends Fragment{
 											DeviceInfoBean deviceInfoBean = new DeviceInfoBean();
 											deviceInfoBean.setDevice_id(device.optString("deviceId"));
 											deviceInfoBean.setDevice_ip("");
-											deviceInfoBean.setDevice_name(device.optString("firendlyName"));
+											deviceInfoBean.setDevice_name(device.optString("friendlyName"));
 											deviceInfoBean.setDevice_status(device.optString("manufacturerName"));
 											deviceInfoBean.setDevice_connectivity_status("UNREARCHABLE");
 											mDeviceList.add(deviceInfoBean);

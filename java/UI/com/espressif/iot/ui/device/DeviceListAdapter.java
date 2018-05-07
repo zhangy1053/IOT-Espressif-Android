@@ -79,7 +79,7 @@ public class DeviceListAdapter extends BaseAdapter{
 			mHolder.switch_img = (ImageView) convertView.findViewById(R.id.device_switch);
 			mHolder.wifi_img = (ImageView) convertView.findViewById(R.id.device_wifi);
 			mHolder.clock_img = (ImageView) convertView.findViewById(R.id.device_clock);
-			//mHolder.delete_img = (ImageView) convertView.findViewById(R.id.device_delete);
+			mHolder.delete_img = (ImageView) convertView.findViewById(R.id.device_delete);
 			mHolder.device_name = (TextView) convertView.findViewById(R.id.device_name);
 			mHolder.device_status = (TextView) convertView.findViewById(R.id.device_status);
 			
@@ -101,10 +101,10 @@ public class DeviceListAdapter extends BaseAdapter{
 
 		if (mDeviceInfoList.get(position).getDevice_status() != null &&
 				mDeviceInfoList.get(position).getDevice_status().equals("ON")) {
-			mHolder.switch_img.setImageResource(R.drawable.device_on);
+			mHolder.switch_img.setImageResource(R.drawable.detail_power_on);
 		}
 		else {
-			mHolder.switch_img.setImageResource(R.drawable.device_offline);
+			mHolder.switch_img.setImageResource(R.drawable.detail_power_off);
 		}
 
 		mHolder.switch_img.setOnClickListener(new OnClickListener() {
@@ -131,13 +131,13 @@ public class DeviceListAdapter extends BaseAdapter{
 			}
 		});
 		
-		mHolder.delete_img.setOnClickListener(new OnClickListener() {
+		/*mHolder.delete_img.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				mListClickListener.onDeleteClick(position);
 			}
-		});
+		});*/
 		
 		return convertView;
 	}
